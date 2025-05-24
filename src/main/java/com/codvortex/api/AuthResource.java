@@ -31,7 +31,7 @@ public class AuthResource {
     private PasswordResetService passwordResetService;
 
     @PostMapping("/login")
-    public ResponseEntity<AuthDTO> login(@RequestParam String username, @RequestParam String password) throws NoSuchAlgorithmException {
+    public ResponseEntity<AuthDTO> login(@RequestParam String username, @RequestParam String password) {
         User user = authenticationService.login(username, password);
         String token = jwtTokenService.generateToken(user.getEmail());
         AuthDTO authDTO = AuthDTO.builder().email(user.getEmail()).role(user.getRole()).username(user.getFullName()).token(token).build();
@@ -66,10 +66,15 @@ public class AuthResource {
     }
 
     @PostMapping("/otp-verify")
-    public ResponseEntity<AuthDTO> verifyOtp(@RequestParam String email, @RequestParam String otp, @RequestBody String newPassword) throws NoSuchAlgorithmException {
+    public ResponseEntity<AuthDTO> verifyOtp(@RequestParam String email, @RequestParam String otp, @RequestBody String newPassword)  {
         String token = jwtTokenService.generateToken(passwordResetService.verifyOtpAndResetPassword(email, otp, newPassword));
         User user = userService.findByEmail(email);
         AuthDTO authDTO = AuthDTO.builder().email(user.getEmail()).username(user.getFullName()).token(token).build();
         return ResponseEntity.ok(authDTO);
+    }
+
+    @GetMapping("/check-token")
+    public ResponseEntity<Boolean> checkToken(@RequestHeader("Authorization") String authHeader) {
+        return ResponseEntity.ok(jwtTokenService.validateToken(authHeader));
     }
 }

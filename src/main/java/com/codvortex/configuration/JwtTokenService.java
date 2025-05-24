@@ -5,9 +5,12 @@ import com.codvortex.repository.SecretKeyRepository;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.io.Decoders;
+import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
 import org.springframework.stereotype.Service;
 
+import java.security.Key;
 import java.security.SecureRandom;
 import java.util.Base64;
 
@@ -27,7 +30,6 @@ public class JwtTokenService {
         if (existing != null) {
             this.secretKey = existing.getSecret();
         } else {
-            // Generate a 256-bit (32-byte) secure random key and base64 encode it
             SecureRandom secureRandom = new SecureRandom();
             byte[] keyBytes = new byte[32];
             secureRandom.nextBytes(keyBytes);
@@ -37,16 +39,24 @@ public class JwtTokenService {
         }
     }
 
+    private Key getSigningKey() {
+        byte[] keyBytes = Decoders.BASE64.decode(secretKey);
+        return Keys.hmacShaKeyFor(keyBytes);
+    }
+
     public String generateToken(String email) {
         return Jwts.builder()
-                .setSubject(email)
-                .signWith(SignatureAlgorithm.HS256, secretKey)
+                .subject(email)
+                .signWith(getSigningKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
 
     public boolean validateToken(String token) {
         try {
-            Jwts.parser().setSigningKey(secretKey).build().parseClaimsJws(token);
+            Jwts.parser()
+                    .setSigningKey(getSigningKey())
+                    .build()
+                    .parseClaimsJws(token.substring(7));
             return true;
         } catch (Exception e) {
             return false;
@@ -54,7 +64,11 @@ public class JwtTokenService {
     }
 
     public String extractEmail(String token) {
-        Claims claims = Jwts.parser().setSigningKey(secretKey).build().parseClaimsJws(token).getBody();
+        Claims claims = Jwts.parser()
+                .setSigningKey(getSigningKey())
+                .build()
+                .parseClaimsJws(token.substring(7))
+                .getBody();
         return claims.getSubject();
     }
 }
