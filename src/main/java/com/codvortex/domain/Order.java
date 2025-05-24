@@ -1,0 +1,35 @@
+package com.codvortex.domain;
+
+import com.codvortex.utils.OrderShippinStatusEnum;
+import com.codvortex.utils.OrderStatusEnum;
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+
+@Entity
+@Table(name = "users")
+@Getter
+@AllArgsConstructor
+@NoArgsConstructor
+@EntityListeners(AuditingEntityListener.class)
+public class Order extends BaseEntity{
+    private BigDecimal price;
+    private LocalDateTime date = LocalDateTime.now();
+    private String address;
+
+    @Enumerated(value = EnumType.STRING)
+    private OrderStatusEnum status;
+
+    @Enumerated(value = EnumType.STRING)
+    private OrderShippinStatusEnum shippingStatus;
+
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JoinColumn(name = "user_id")
+    private User user;
+
+}
