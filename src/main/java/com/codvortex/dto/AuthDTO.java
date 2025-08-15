@@ -15,5 +15,7 @@ public class AuthDTO {
     private String email;
     private BigInteger balance;
     private RoleEnum role;
+    private String rib;
+    private String bankName;
     private String token;
 }

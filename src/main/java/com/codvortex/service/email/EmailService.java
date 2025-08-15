@@ -28,24 +28,24 @@ public class EmailService {
         helper.setText("<div style=\"font-family: Helvetica,Arial,sans-serif;min-width:1000px;overflow:auto;line-height:2\">\n" +
                 "  <div style=\"margin:50px auto;width:70%;padding:20px 0\">\n" +
                 "    <div style=\"border-bottom:1px solid #eee\">\n" +
-                "      <a href=\"\" style=\"font-size:1.4em;color: #00466a;text-decoration:none;font-weight:600\">COD VORTEX</a>\n" +
+                "      <a href=\"\" style=\"font-size:1.4em;color: #C059FC;text-decoration:none;font-weight:600\">COD VORTEX</a>\n" +
                 "    </div>\n" +
                 "    <p style=\"font-size:1.1em\">Changement de mot de pass, (" +
                 ((username != null) ? username : fullName) +
                 ")</p>\n" +
                 "    <p>Vous pouver utiliser ce code OTP pour changer votre mot de pass. Le code OTP est valable pour 10 minutes.</p>\n" +
-                "    <h2 style=\"background: #00466a;margin: 0 auto;width: max-content;padding: 0 10px;color: #fff;border-radius: 4px;\">" +
+                "    <h2 style=\"background: #C059FC;margin: 0 auto;width: max-content;padding: 0 10px;color: #fff;border-radius: 4px;\">" +
                 otp +
                 "    </h2>\n" +
                 "    <p style=\"font-size:0.9em;\">Merci,<br />COD VORTEX</p>\n" +
                 "    <hr style=\"border:none;border-top:1px solid #eee\" />\n" +
                 "    <div style=\"float:right;padding:8px 0;color:#aaa;font-size:0.8em;line-height:1;font-weight:300\">\n" +
                 "      <p>COD VORTEX Inc</p>\n" +
-                "      <p>Fes, Maroc</p>\n" +
+                "      <p>Maroc</p>\n" +
                 "    </div>\n" +
                 "  </div>\n" +
                 "</div>", true);
-
+        System.out.println("cscsdcsdcsdcsddddddddddddddddd");
         mailSender.send(message);
     }
 

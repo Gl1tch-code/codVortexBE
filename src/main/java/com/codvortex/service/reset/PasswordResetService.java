@@ -30,7 +30,7 @@ public class PasswordResetService {
     private OtpRepository otpRepository;
 
     public void requestOtp(String email) throws MessagingException {
-        User user = userRepository.findByEmail(email).orElseThrow(() -> new IllegalArgumentException("هذا البريد غير موجود، المرجوا إنشاء حساب"));
+        User user = userRepository.findByEmail(email).orElseThrow(() -> new IllegalArgumentException("Invalid email address"));
 
         String otpValue = generateOtp();
         LocalDateTime expiryDate = LocalDateTime.now().plusMinutes(10);
@@ -50,7 +50,7 @@ public class PasswordResetService {
         Optional<Otp> otpOptional = otpRepository.findByUserAndOtp(user, otp);
 
         if (otpOptional.isEmpty()) {
-            throw new IllegalArgumentException("رمز التأكيد غير صحيح");
+            throw new IllegalArgumentException("Wrong OTP");
         }
 
         Otp otpData = otpOptional.get();
