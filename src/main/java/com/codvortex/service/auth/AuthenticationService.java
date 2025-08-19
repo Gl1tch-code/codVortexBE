@@ -19,13 +19,15 @@ public class AuthenticationService {
     public User registerInitialUser(InitialSignupCommand initialSignupRequest) {
 
         if (userRepository.existsByEmail(initialSignupRequest.getEmail())){
-            throw new IllegalArgumentException("هذا البريد موجود، المرجو تسجيل الدخول");
+            throw new IllegalArgumentException("User already exists, please LogIn");
         }
         User user = new User();
         user.setEmail(initialSignupRequest.getEmail());
         user.setFullName(initialSignupRequest.getFullName());
         user.setPassword(passwordEncoder.encode(initialSignupRequest.getPassword()));
         user.setPhoneNumber(initialSignupRequest.getPhoneNumber());
+        user.setActive(false);
+        user.setAccountManagerAssigned(false);
 
         return userRepository.save(user);
     }

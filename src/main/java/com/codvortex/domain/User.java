@@ -26,6 +26,7 @@ public class User extends BaseEntity implements UserDetails {
     private boolean isActive = false;
     private String rib;
     private String bankName;
+    private boolean isAccountManagerAssigned = false;
 
     @Column(unique = true, nullable = false)
     private String email;
