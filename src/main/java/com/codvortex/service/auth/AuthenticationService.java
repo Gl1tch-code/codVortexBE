@@ -27,7 +27,7 @@ public class AuthenticationService {
         user.setPassword(passwordEncoder.encode(initialSignupRequest.getPassword()));
         user.setPhoneNumber(initialSignupRequest.getPhoneNumber());
         user.setActive(false);
-        user.setAccountManagerAssigned(false);
+        user.setIsAccountManagerAssigned(false);
 
         return userRepository.save(user);
     }
