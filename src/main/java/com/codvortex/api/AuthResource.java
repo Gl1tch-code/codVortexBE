@@ -39,6 +39,7 @@ public class AuthResource {
         User user = authenticationService.login(username, password);
         String token = jwtTokenService.generateToken(user.getEmail());
         AuthDTO authDTO = AuthDTO.builder()
+                .isAccountManagerAssigned(user.getIsAccountManagerAssigned())
                 .rib(user.getRib())
                 .bankName(user.getBankName())
                 .email(user.getEmail()).role(user.getRole()).username(user.getFullName()).token(token).build();
@@ -58,6 +59,7 @@ public class AuthResource {
         userRepository.save(user);
 
         AuthDTO authDTO = AuthDTO.builder()
+                .isAccountManagerAssigned(user.getIsAccountManagerAssigned())
                 .rib(user.getRib())
                 .bankName(user.getBankName())
                 .email(user.getEmail()).role(user.getRole()).username(user.getFullName()).token(token).build();
@@ -72,6 +74,7 @@ public class AuthResource {
             User user = authenticationService.registerInitialUser(initialSignupRequest);
             String token = jwtTokenService.generateToken(user.getEmail());
             AuthDTO authDTO = AuthDTO.builder()
+                    .isAccountManagerAssigned(user.getIsAccountManagerAssigned())
                     .rib(user.getRib())
                     .bankName(user.getBankName())
                     .email(user.getEmail()).role(user.getRole()).username(user.getFullName()).token(token).build();
@@ -100,6 +103,7 @@ public class AuthResource {
         String token = jwtTokenService.generateToken(passwordResetService.verifyOtpAndResetPassword(email, otp, newPassword));
         User user = userService.findByEmail(email);
         AuthDTO authDTO = AuthDTO.builder()
+                .isAccountManagerAssigned(user.getIsAccountManagerAssigned())
                 .rib(user.getRib())
                 .bankName(user.getBankName())
                 .email(user.getEmail()).username(user.getFullName()).token(token).build();
@@ -109,6 +113,14 @@ public class AuthResource {
     @GetMapping("/check-token")
     public ResponseEntity<Boolean> checkToken(@RequestHeader("Authorization") String authHeader) {
         return ResponseEntity.ok(jwtTokenService.validateToken(authHeader));
+    }
+
+    @GetMapping("/check-account-manager")
+    public ResponseEntity<Boolean> checkAccountManagerAssigned(@RequestHeader("Authorization") String authHeader) {
+        User user = userRepository.findByUsername(jwtTokenService.extractEmail(authHeader))
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        return ResponseEntity.ok(user.getIsAccountManagerAssigned());
     }
 
     @GetMapping("/check-activation")

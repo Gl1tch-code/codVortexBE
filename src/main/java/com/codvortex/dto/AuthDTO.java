@@ -18,4 +18,5 @@ public class AuthDTO {
     private String rib;
     private String bankName;
     private String token;
+    private Boolean isAccountManagerAssigned;
 }
