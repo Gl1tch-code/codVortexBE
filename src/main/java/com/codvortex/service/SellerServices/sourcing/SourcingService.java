@@ -14,6 +14,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -64,6 +65,7 @@ public class SourcingService {
                         .status(SourcingStatusEnum.NEW)
                         .paymentStatus(SourcingPaymentStatusEnum.NOT_PAYED)
                         .isShippingFeesPayed(false)
+                        .shippingFees(BigDecimal.ZERO)
                         .build()
         );
 
