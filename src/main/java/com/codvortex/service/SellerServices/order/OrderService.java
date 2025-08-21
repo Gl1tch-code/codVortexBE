@@ -55,6 +55,7 @@ public class OrderService {
         order.setAddress(command.getAddress());
         order.setName(command.getCustomerName());
         order.setDate(LocalDateTime.now());
+        order.setUpdatedAt(LocalDateTime.now());
         order.setStatus(OrderStatusEnum.PENDING);
         order.setShippingStatus(OrderShippinStatusEnum.PENDING);
         order.setPhoneNumber(command.getPhoneNumber());
@@ -120,6 +121,7 @@ public class OrderService {
                 order.setPrice(price);
                 order.setAddress(address);
                 order.setDate(LocalDateTime.now());
+                order.setUpdatedAt(LocalDateTime.now());
                 order.setStatus(OrderStatusEnum.PENDING);
                 order.setShippingStatus(OrderShippinStatusEnum.PENDING);
                 order.setUser(user);
