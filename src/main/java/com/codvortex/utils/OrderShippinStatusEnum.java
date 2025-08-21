@@ -8,4 +8,7 @@ public enum OrderShippinStatusEnum {
     RETURNED,
     REPROGRAMMED,
     CANCELLED,
+    UNREACHABLE,
+    NO_REPLY,
+    POSTPONED
 }

@@ -4,5 +4,7 @@ public enum OrderStatusEnum {
     PENDING,
     CONFIRMED,
     CANCELLED,
-    NO_REPLY
+    NO_REPLY,
+    UNREACHABLE,
+    POSTPONED
 }
