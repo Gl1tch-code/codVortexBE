@@ -1,9 +1,6 @@
 package com.codvortex.repository;
 
-import com.codvortex.domain.Order;
 import com.codvortex.domain.Product;
-import com.codvortex.utils.OrderShippinStatusEnum;
-import com.codvortex.utils.OrderStatusEnum;
 import jakarta.persistence.criteria.Predicate;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -21,6 +18,9 @@ public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpec
     @Query("SELECT p FROM Product p WHERE p.country.id = :countryId AND p.isAvailableStock = true")
     List<Product> findByCountryAndIsAvailableStock(Long countryId);
 
+
+    @Query("SELECT p FROM Product p JOIN p.sourcingProducts sp WHERE sp.sourcing.id = :sourcingId ")
+    List<Product> findAllBySourcingId(Long sourcingId);
 
     default Page<Product> findByKeyword(
             Long userId,

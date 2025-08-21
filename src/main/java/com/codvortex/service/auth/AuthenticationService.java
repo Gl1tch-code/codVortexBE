@@ -18,7 +18,7 @@ public class AuthenticationService {
 
     public User registerInitialUser(InitialSignupCommand initialSignupRequest) {
 
-        if (userRepository.existsByEmail(initialSignupRequest.getEmail())){
+        if (userRepository.existsByEmail(initialSignupRequest.getEmail())) {
             throw new IllegalArgumentException("User already exists, please LogIn");
         }
         User user = new User();
@@ -56,4 +56,20 @@ public class AuthenticationService {
 
         user.setActive(true);
     }
+
+
+    // admin
+
+
+    public User loginAdmin(String username, String password) {
+        User user = userRepository.findByUsernameAndAdmin(username)
+                .orElseThrow(() -> new IllegalStateException("User not found"));
+
+        if (passwordEncoder.matches(password, user.getPassword())) {
+            return user;
+        } else {
+            throw new IllegalStateException("Invalid password");
+        }
+    }
+
 }

@@ -1,3 +1,6 @@
+app:
+  base-url: "http://localhost:8080"
+
 spring:
   application:
     name: COD-VORTEX
@@ -20,14 +23,10 @@ spring:
     show-sql: true
 
   mail:
-    host: smtp.gmail.com
-    port: 587
-    username: ibrahimdrissi09@gmail.com
-    password: tkxi isjw ugdb gzbr
-    properties:
-      mail.smtp.auth: true
-      mail.smtp.starttls.enable: true
-      mail.debug: true
+    host: mail.codvortex.com
+    port: 25
+    username: support@codvortex.com
+    password: Support123yass
 
 logging:
   level:

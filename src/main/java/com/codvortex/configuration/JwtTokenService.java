@@ -1,7 +1,9 @@
 package com.codvortex.configuration;
 
 import com.codvortex.domain.SecretKeyEntity;
+import com.codvortex.domain.User;
 import com.codvortex.repository.SecretKeyRepository;
+import com.codvortex.repository.UserRepository;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -13,15 +15,18 @@ import org.springframework.stereotype.Service;
 import java.security.Key;
 import java.security.SecureRandom;
 import java.util.Base64;
+import java.util.Optional;
 
 @Service
 public class JwtTokenService {
 
     private final SecretKeyRepository secretKeyRepository;
+    private final UserRepository userRepository;
     private String secretKey;
 
-    public JwtTokenService(SecretKeyRepository secretKeyRepository) {
+    public JwtTokenService(SecretKeyRepository secretKeyRepository, UserRepository userRepository) {
         this.secretKeyRepository = secretKeyRepository;
+        this.userRepository = userRepository;
     }
 
     @PostConstruct
@@ -62,6 +67,21 @@ public class JwtTokenService {
             return false;
         }
     }
+
+    public boolean validateTokenAdmin(String token) {
+        try {
+            Jwts.parser()
+                    .setSigningKey(getSigningKey())
+                    .build()
+                    .parseClaimsJws(token.substring(7));
+
+            Optional<User> user = userRepository.findByUsernameAndAdmin(extractEmail(token));
+            return user.isPresent();
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
 
     public String extractEmail(String token) {
         Claims claims = Jwts.parser()

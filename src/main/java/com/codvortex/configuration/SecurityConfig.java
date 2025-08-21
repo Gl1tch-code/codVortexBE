@@ -1,7 +1,7 @@
 package com.codvortex.configuration;
 
 import com.codvortex.repository.UserRepository;
-import com.codvortex.service.customUserDetails.CustomUserDetailsService;
+import com.codvortex.service.SellerServices.customUserDetails.CustomUserDetailsService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;

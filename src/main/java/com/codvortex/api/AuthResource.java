@@ -7,15 +7,12 @@ import com.codvortex.dto.AuthDTO;
 import com.codvortex.dto.UserBillings;
 import com.codvortex.repository.UserRepository;
 import com.codvortex.service.auth.AuthenticationService;
-import com.codvortex.service.reset.PasswordResetService;
+import com.codvortex.service.SellerServices.reset.PasswordResetService;
 import com.codvortex.service.user.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import jakarta.validation.Valid;
-
-import java.security.NoSuchAlgorithmException;
 
 @RestController
 @RequestMapping("/auth")
@@ -133,4 +130,27 @@ public class AuthResource {
         authenticationService.activateUser(authHeader);
         return ResponseEntity.ok().build();
     }
+
+
+    // admin
+
+
+    @PostMapping("/login/admin")
+    public ResponseEntity<AuthDTO> loginAdmin(@RequestParam String username, @RequestParam String password) {
+        User user = authenticationService.loginAdmin(username, password);
+        String token = jwtTokenService.generateToken(user.getEmail());
+        AuthDTO authDTO = AuthDTO.builder()
+                .isAccountManagerAssigned(user.getIsAccountManagerAssigned())
+                .rib(user.getRib())
+                .bankName(user.getBankName())
+                .email(user.getEmail()).role(user.getRole()).username(user.getFullName()).token(token).build();
+
+        return ResponseEntity.ok(authDTO);
+    }
+
+    @GetMapping("/check-token-admin")
+    public ResponseEntity<Boolean> checkTokenAdmin(@RequestHeader("Authorization") String authHeader) {
+        return ResponseEntity.ok(jwtTokenService.validateTokenAdmin(authHeader));
+    }
+
 }

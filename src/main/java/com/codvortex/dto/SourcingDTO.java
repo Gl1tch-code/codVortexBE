@@ -2,6 +2,7 @@ package com.codvortex.dto;
 
 import com.codvortex.utils.SourcingPaymentStatusEnum;
 import com.codvortex.utils.SourcingStatusEnum;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -9,6 +10,7 @@ import java.math.BigDecimal;
 
 @Getter
 @Setter
+@Builder
 public class SourcingDTO {
     private Long id;
     private String title;
@@ -20,4 +22,6 @@ public class SourcingDTO {
     private SourcingStatusEnum status;
     private String paymentTransferInvoice;
     private SourcingPaymentStatusEnum paymentStatus;
+    private BigDecimal shippingFees;
+    private Boolean isShippingFeesPayed;
 }
