@@ -52,6 +52,7 @@ public class EmployeeOrderService {
 
         orderRepository.findById(id).ifPresent(order -> {
             order.setAddress(address);
+            order.setUpdatedAt(LocalDateTime.now());
         });
     }
 
@@ -61,6 +62,7 @@ public class EmployeeOrderService {
 
         orderRepository.findById(id).ifPresent(order -> {
             order.setQuantity(quant);
+            order.setUpdatedAt(LocalDateTime.now());
         });
     }
 
@@ -70,6 +72,7 @@ public class EmployeeOrderService {
 
         orderRepository.findById(id).ifPresent(order -> {
             order.setStatus(OrderStatusEnum.valueOf(val));
+            order.setUpdatedAt(LocalDateTime.now());
         });
     }
 
@@ -79,6 +82,7 @@ public class EmployeeOrderService {
 
         orderRepository.findById(id).ifPresent(order -> {
             order.setShippingStatus(OrderShippinStatusEnum.valueOf(val));
+            order.setUpdatedAt(LocalDateTime.now());
         });
     }
 
@@ -88,6 +92,7 @@ public class EmployeeOrderService {
 
         orderRepository.findById(id).ifPresent(order -> {
             order.setMessage(val);
+            order.setUpdatedAt(LocalDateTime.now());
         });
     }
 
@@ -101,6 +106,7 @@ public class EmployeeOrderService {
 
         orderRepository.findById(id).ifPresent(order -> {
             order.setCountry(country);
+            order.setUpdatedAt(LocalDateTime.now());
         });
     }
 
