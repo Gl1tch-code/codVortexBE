@@ -68,6 +68,19 @@ public class JwtTokenService {
         }
     }
 
+    public String extractEmail(String token) {
+        Claims claims = Jwts.parser()
+                .setSigningKey(getSigningKey())
+                .build()
+                .parseClaimsJws(token.substring(7))
+                .getBody();
+        return claims.getSubject();
+    }
+
+
+    // admin
+
+
     public boolean validateTokenAdmin(String token) {
         try {
             Jwts.parser()
@@ -83,12 +96,21 @@ public class JwtTokenService {
     }
 
 
-    public String extractEmail(String token) {
-        Claims claims = Jwts.parser()
-                .setSigningKey(getSigningKey())
-                .build()
-                .parseClaimsJws(token.substring(7))
-                .getBody();
-        return claims.getSubject();
+    // Employee
+
+
+    public boolean validateTokenEmployee(String token) {
+        try {
+            Jwts.parser()
+                    .setSigningKey(getSigningKey())
+                    .build()
+                    .parseClaimsJws(token.substring(7));
+
+            Optional<User> user = userRepository.findByUsernameAndEmployeeOrAdmin(extractEmail(token));
+            return user.isPresent();
+        } catch (Exception e) {
+            return false;
+        }
     }
+
 }

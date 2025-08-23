@@ -1,6 +1,7 @@
 package com.codvortex.repository;
 
 import com.codvortex.domain.User;
+import com.codvortex.dto.EmployeeDTOs.UserSummaryDto;
 import jakarta.persistence.criteria.Predicate;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -9,6 +10,7 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
 public interface UserRepository extends JpaRepository<User, Long>, JpaSpecificationExecutor<User> {
@@ -29,10 +31,22 @@ public interface UserRepository extends JpaRepository<User, Long>, JpaSpecificat
             """)
     Optional<User> findByUsernameAndAdmin(String username);
 
+    @Query("""
+                SELECT u FROM User u
+                    WHERE (u.role = 'ADMIN' OR u.role = 'EMPLOYEE') AND LOWER(REPLACE(u.email, ' ', '')) = LOWER(REPLACE(:username, ' ', ''))
+                        OR LOWER(REPLACE(u.fullName, ' ', '')) LIKE LOWER(CONCAT('%', REPLACE(:username, ' ', ''), '%'))
+                        OR u.phoneNumber = :username
+            
+            """)
+    Optional<User> findByUsernameAndEmployeeOrAdmin(String username);
+
     @Query("SELECT u FROM User u WHERE u.email = :email")
     Optional<User> findByEmail(String email);
 
     boolean existsByEmail(String email);
+
+    @Query("SELECT new com.codvortex.dto.EmployeeDTOs.UserSummaryDto(u.id, u.email, u.phoneNumber, u.fullName) FROM User u")
+    List<UserSummaryDto> findAllSummaries();
 
 
     default Page<User> findByKeyword(

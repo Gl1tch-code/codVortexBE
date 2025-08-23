@@ -153,4 +153,26 @@ public class AuthResource {
         return ResponseEntity.ok(jwtTokenService.validateTokenAdmin(authHeader));
     }
 
+
+    // Employee
+
+
+    @PostMapping("/login/employee")
+    public ResponseEntity<AuthDTO> loginEmployee(@RequestParam String username, @RequestParam String password) {
+        User user = authenticationService.loginEmployee(username, password);
+        String token = jwtTokenService.generateToken(user.getEmail());
+        AuthDTO authDTO = AuthDTO.builder()
+                .isAccountManagerAssigned(user.getIsAccountManagerAssigned())
+                .rib(user.getRib())
+                .bankName(user.getBankName())
+                .email(user.getEmail()).role(user.getRole()).username(user.getFullName()).token(token).build();
+
+        return ResponseEntity.ok(authDTO);
+    }
+
+    @GetMapping("/check-token-employee")
+    public ResponseEntity<Boolean> checkTokenEmployee(@RequestHeader("Authorization") String authHeader) {
+        return ResponseEntity.ok(jwtTokenService.validateTokenEmployee(authHeader));
+    }
+
 }

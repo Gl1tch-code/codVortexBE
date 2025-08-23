@@ -72,4 +72,19 @@ public class AuthenticationService {
         }
     }
 
+
+    // Employee
+
+
+    public User loginEmployee(String username, String password) {
+        User user = userRepository.findByUsernameAndEmployeeOrAdmin(username)
+                .orElseThrow(() -> new IllegalStateException("User not found"));
+
+        if (passwordEncoder.matches(password, user.getPassword())) {
+            return user;
+        } else {
+            throw new IllegalStateException("Invalid password");
+        }
+    }
+
 }

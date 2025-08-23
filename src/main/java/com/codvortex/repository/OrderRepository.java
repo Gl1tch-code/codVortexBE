@@ -85,6 +85,88 @@ public interface OrderRepository extends JpaRepository<Order, Long>, JpaSpecific
         }, pageable);
     }
 
+    default Page<Order> findAsEmployeeByKeyword(
+            Long userId,
+            String keyword,
+            OrderStatusEnum status,
+            OrderShippinStatusEnum shippingStatus,
+            Long country,
+            Boolean paymentStatus, // <-- new param (true = paid, false = not paid)
+            LocalDateTime startDate, // <-- new param
+            LocalDateTime endDate,   // <-- new param
+            Pageable pageable
+    ) {
+        return findAll((root, query, cb) -> {
+            Predicate userPredicate = userId != null
+                    ? cb.equal(root.get("user").get("id"), userId)
+                    : cb.conjunction();
+
+            Predicate statusPredicate = status != null
+                    ? cb.equal(root.get("status"), status)
+                    : cb.conjunction();
+
+            Predicate shippingStatusPredicate = shippingStatus != null
+                    ? cb.equal(root.get("shippingStatus"), shippingStatus)
+                    : cb.conjunction();
+
+            Predicate countryPredicate = country != null
+                    ? cb.equal(cb.lower(root.get("country").get("id")), country)
+                    : cb.conjunction();
+
+            // ✅ Payment status predicate (checking both seller & product owner payments)
+            Predicate paymentPredicate = cb.conjunction();
+            if (paymentStatus != null) {
+                // Example: consider order paid if both seller and product owner are paid
+                paymentPredicate = paymentStatus
+                        ? cb.and(cb.isTrue(root.get("isSellerPayed")), cb.isTrue(root.get("isProductOwnerPayed")))
+                        : cb.or(cb.isFalse(root.get("isSellerPayed")), cb.isFalse(root.get("isProductOwnerPayed")));
+            }
+
+            // ✅ Date range predicate
+            Predicate datePredicate = cb.conjunction();
+            if (startDate != null && endDate != null) {
+                datePredicate = cb.between(root.get("date"), startDate, endDate);
+            } else if (startDate != null) {
+                datePredicate = cb.greaterThanOrEqualTo(root.get("date"), startDate);
+            } else if (endDate != null) {
+                datePredicate = cb.lessThanOrEqualTo(root.get("date"), endDate);
+            }
+
+            // ✅ Keyword search
+            Predicate keywordPredicate = cb.conjunction();
+            if (keyword != null && !keyword.isBlank()) {
+                String[] words = keyword.toLowerCase().trim().split("\\s+");
+
+                Predicate addressPredicate = Arrays.stream(words)
+                        .map(word -> cb.like(cb.lower(root.get("address")), "%" + word + "%"))
+                        .reduce(cb::and)
+                        .orElse(cb.conjunction());
+
+                Predicate idPredicate = cb.like(
+                        cb.function("str", String.class, root.get("id")),
+                        "%" + keyword + "%"
+                );
+
+                Predicate namePredicate = cb.like(cb.lower(root.get("name")), "%" + keyword.toLowerCase() + "%");
+                Predicate phonePredicate = cb.like(cb.lower(root.get("phoneNumber")), "%" + keyword.toLowerCase() + "%");
+
+                keywordPredicate = cb.or(addressPredicate, idPredicate, namePredicate, phonePredicate);
+            }
+
+            query.orderBy(cb.desc(root.get("id")));
+
+            return cb.and(
+                    userPredicate,
+                    statusPredicate,
+                    shippingStatusPredicate,
+                    countryPredicate,
+                    paymentPredicate,
+                    datePredicate,
+                    keywordPredicate
+            );
+        }, pageable);
+    }
+
 
 
 }
