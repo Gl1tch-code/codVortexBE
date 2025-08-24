@@ -17,6 +17,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.math.BigDecimal;
 
 @Service
 @RequiredArgsConstructor
@@ -62,6 +63,16 @@ public class EmployeeOrderService {
 
         orderRepository.findById(id).ifPresent(order -> {
             order.setQuantity(quant);
+            order.setUpdatedAt(LocalDateTime.now());
+        });
+    }
+
+    public void updatePrice(Long id, String value, String token) {
+        userRepository.findByUsernameAndEmployeeOrAdmin(jwtTokenService.extractEmail(token))
+                .orElseThrow(() -> new RuntimeException("User Not Found"));
+
+        orderRepository.findById(id).ifPresent(order -> {
+            order.setPrice(BigDecimal.valueOf(Double.parseDouble(value)));
             order.setUpdatedAt(LocalDateTime.now());
         });
     }

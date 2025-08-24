@@ -45,6 +45,12 @@ public class EmployeeOrderResource {
         return ResponseEntity.ok().build();
     }
 
+    @PostMapping("/price/{id}")
+    public ResponseEntity<Void> updatePrice(@PathVariable Long id, @RequestParam String value, @RequestHeader("Authorization") String authHeader) {
+        employeeOrderService.updatePrice(id, value, authHeader);
+        return ResponseEntity.ok().build();
+    }
+
     @PostMapping("/status/{id}")
     public ResponseEntity<Void> updateStatus(@PathVariable Long id, @RequestParam String value, @RequestHeader("Authorization") String authHeader) {
         employeeOrderService.updateStatus(id, value, authHeader);

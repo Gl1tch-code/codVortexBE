@@ -110,7 +110,7 @@ public interface OrderRepository extends JpaRepository<Order, Long>, JpaSpecific
                     : cb.conjunction();
 
             Predicate countryPredicate = country != null
-                    ? cb.equal(cb.lower(root.get("country").get("id")), country)
+                    ? cb.equal(root.get("country").get("id"), country)
                     : cb.conjunction();
 
             // ✅ Payment status predicate (checking both seller & product owner payments)
