@@ -16,5 +16,6 @@ public class InvoiceDTO {
     private Integer ordersCount;
     private LocalDateTime updatedAt;
     private InvoiceStatus status;
+    private String fileLink;
 
 }

@@ -22,6 +22,7 @@ public class Invoice {
     private String id;
 
     private String transferImg;
+    private String fileLink;
     private BigDecimal totalPrice;
 
     @Enumerated(value = EnumType.STRING)

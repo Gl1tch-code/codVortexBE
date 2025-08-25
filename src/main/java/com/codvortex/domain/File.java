@@ -14,6 +14,7 @@ public class File {
     private String name;
     private String type;
     private long size;
+    private String contentType;
 
     @Lob
     @Column(name = "data")
