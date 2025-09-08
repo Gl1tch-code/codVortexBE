@@ -2,11 +2,13 @@ package com.codvortex.api.SellerApis;
 
 import com.codvortex.commands.ProductSwitchDropCommand;
 import com.codvortex.configuration.JwtTokenService;
+import com.codvortex.domain.User;
 import com.codvortex.dto.ProductDTO;
 import com.codvortex.dto.ProductDropDTO;
 import com.codvortex.dto.ProductPageDTO;
 import com.codvortex.repository.CountryRepository;
 import com.codvortex.repository.ProductRepository;
+import com.codvortex.repository.UserRepository;
 import com.codvortex.service.SellerServices.product.ProductService;
 import com.codvortex.utils.OrderShippinStatusEnum;
 import com.codvortex.utils.SourcingStatusEnum;
@@ -25,12 +27,14 @@ public class ProductResource {
     private final JwtTokenService jwtTokenService;
     private final CountryRepository countryRepository;
     private final ProductService productService;
+    private final UserRepository userRepository;
 
-    public ProductResource(ProductRepository productRepository, JwtTokenService jwtTokenService, CountryRepository countryRepository, ProductService productService) {
+    public ProductResource(ProductRepository productRepository, JwtTokenService jwtTokenService, CountryRepository countryRepository, ProductService productService, UserRepository userRepository) {
         this.productRepository = productRepository;
         this.jwtTokenService = jwtTokenService;
         this.countryRepository = countryRepository;
         this.productService = productService;
+        this.userRepository = userRepository;
     }
 
     @GetMapping
@@ -78,12 +82,13 @@ public class ProductResource {
     }
 
     @GetMapping("/availableStock/all")
-    public ResponseEntity<List<ProductDTO>> getAllAvailableStockProducts(@RequestParam("country") String country) {
+    public ResponseEntity<List<ProductDTO>> getAllAvailableStockProducts(@RequestParam("country") String country, @RequestHeader("Authorization") String authHeader) {
+        User user = userRepository.findByUsername(jwtTokenService.extractEmail(authHeader)).orElseThrow(() -> new RuntimeException("User Not Found"));
         Long countryId = countryRepository.findByKeyIgnoreCase(country.toLowerCase())
                 .orElseThrow(() -> new IllegalArgumentException("Country not found: " + country)).getId();
 
         return ResponseEntity.ok(
-                productRepository.findByCountryAndIsAvailableStock(countryId)
+                productRepository.findByCountryAndIsAvailableStock(countryId, user.getId())
                         .stream()
                         .filter(p -> p.getQuantity() > 0)
                         .map(p -> {
