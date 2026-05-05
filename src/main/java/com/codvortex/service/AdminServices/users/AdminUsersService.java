@@ -16,6 +16,7 @@ import com.codvortex.repository.OrderRepository;
 import com.codvortex.repository.ProductRepository;
 import com.codvortex.repository.SourcingRepository;
 import com.codvortex.repository.UserRepository;
+import com.codvortex.utils.Constants;
 import com.codvortex.utils.OrderShippinStatusEnum;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -148,8 +149,8 @@ public class AdminUsersService {
 
         BigDecimal balance = BigDecimal.ZERO;
 
-        BigDecimal minus = new BigDecimal("4500");
-        BigDecimal divisor = new BigDecimal("65");
+        BigDecimal minus = Constants.DELIVERY_FEES;
+        BigDecimal divisor = Constants.CHANGE;
 
         for (Order order : orderRepository.findAllByUserId(user.getId())) {
             if (order.getShippingStatus() == OrderShippinStatusEnum.DELIVERED) {

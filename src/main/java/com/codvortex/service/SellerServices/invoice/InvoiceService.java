@@ -5,6 +5,7 @@ import com.codvortex.domain.*;
 import com.codvortex.dto.InvoiceDTO;
 import com.codvortex.dtoMappers.InvoiceMapper;
 import com.codvortex.repository.*;
+import com.codvortex.utils.Constants;
 import com.codvortex.utils.InvoiceStatus;
 import com.codvortex.utils.OrderShippinStatusEnum;
 import com.lowagie.text.*;
@@ -67,8 +68,8 @@ public class InvoiceService {
 
         BigDecimal balance = BigDecimal.ZERO;
 
-        BigDecimal minus = new BigDecimal("4500");
-        BigDecimal divisor = new BigDecimal("65");
+        BigDecimal minus = Constants.DELIVERY_FEES;
+        BigDecimal divisor = Constants.CHANGE;
 
         for (Order order : orderRepository.findAllByUserId(user.getId())) {
             if (order.getShippingStatus() == OrderShippinStatusEnum.DELIVERED) {
@@ -316,9 +317,9 @@ public class InvoiceService {
             table.addCell(order.getProduct().getName());
             table.addCell(order.getQuantity().toString());
             table.addCell(order.getPrice().toPlainString());
-            table.addCell("4500 CFA");
-            table.addCell(order.getPrice().subtract(BigDecimal.valueOf(4500)).toPlainString());
-            totalPrice = totalPrice.add(order.getPrice().subtract(BigDecimal.valueOf(4500)));
+            table.addCell(Constants.DELIVERY_FEES + " CFA");
+            table.addCell(order.getPrice().subtract(Constants.DELIVERY_FEES).toPlainString());
+            totalPrice = totalPrice.add(order.getPrice().subtract(Constants.CHANGE));
         }
 
         doc.add(table);
@@ -345,10 +346,10 @@ public class InvoiceService {
             table.addCell(order.getProduct().getName());
             table.addCell(order.getQuantity().toString());
             table.addCell(order.getPrice().toPlainString());
-            table.addCell("4500 CFA");
+            table.addCell(Constants.DELIVERY_FEES + " CFA");
             table.addCell(order.getProduct().getPrice().toPlainString());
-            table.addCell(order.getPrice().subtract(BigDecimal.valueOf(4500)).subtract(order.getProduct().getPrice()).toPlainString());
-            totalPrice = totalPrice.add(order.getPrice().subtract(BigDecimal.valueOf(4500)).subtract(order.getProduct().getPrice()));
+            table.addCell(order.getPrice().subtract(Constants.DELIVERY_FEES).subtract(order.getProduct().getPrice()).toPlainString());
+            totalPrice = totalPrice.add(order.getPrice().subtract(Constants.CHANGE).subtract(order.getProduct().getPrice()));
         }
 
         doc.add(table);
