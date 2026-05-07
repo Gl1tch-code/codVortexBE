@@ -44,10 +44,10 @@ public class AuthenticationService {
     }
 
     public Boolean checkActivation(String token) {
-//        User user = userRepository.findByUsername(jwtTokenService.extractEmail(token))
-//                .orElseThrow(() -> new RuntimeException("User not found"));
-//        return user.isActive();
-        return true;
+        User user = userRepository.findByUsername(jwtTokenService.extractEmail(token))
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        return user.isActive();
     }
 
     public void activateUser(String token) {

@@ -55,7 +55,7 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(Arrays.asList("http://localhost:5173", "http://localhost:5174", "https://admin.codvortex.com", "https://confirmation.codvortex.com")); // or "*" for dev
+        config.setAllowedOrigins(Arrays.asList("http://192.168.1.5:5173", "https://codvortex.com", "https://admin.codvortex.com", "https://confirmation.codvortex.com", "http://confirmation.codvortex.com")); // or "*" for dev
         config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type"));
         config.setAllowCredentials(true);
