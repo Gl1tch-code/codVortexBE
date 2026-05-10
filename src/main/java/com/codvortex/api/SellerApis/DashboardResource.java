@@ -29,14 +29,20 @@ public class DashboardResource {
     }
 
     @GetMapping("/orders")
-    public ResponseEntity<DashboardOrdersSummaryDTO> getOrders(@RequestHeader("Authorization") String authHeader, @RequestParam String startDate, @RequestParam String endDate, @RequestParam String country) {
+    public ResponseEntity<DashboardOrdersSummaryDTO> getOrders(
+            @RequestHeader("Authorization") String authHeader,
+            @RequestParam String startDate,
+            @RequestParam String endDate,
+            @RequestParam String country,
+            @RequestParam(required = false) Long productId) { // Added optional param
+
         Instant startDateinstant = Instant.parse(startDate);
-        LocalDateTime startDateinstantlocalDateTime = LocalDateTime.ofInstant(startDateinstant, ZoneId.systemDefault());
+        LocalDateTime start = LocalDateTime.ofInstant(startDateinstant, ZoneId.systemDefault());
 
         Instant endDateinstant = Instant.parse(endDate);
-        LocalDateTime endDateinstantlocalDateTime = LocalDateTime.ofInstant(endDateinstant, ZoneId.systemDefault());
+        LocalDateTime end = LocalDateTime.ofInstant(endDateinstant, ZoneId.systemDefault());
 
-        return ResponseEntity.ok(dashboardService.getOrdersSummary(authHeader, startDateinstantlocalDateTime, endDateinstantlocalDateTime, country));
+        return ResponseEntity.ok(dashboardService.getOrdersSummary(authHeader, start, end, country, productId));
     }
 
 }

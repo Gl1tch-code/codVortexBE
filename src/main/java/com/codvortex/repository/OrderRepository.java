@@ -32,12 +32,16 @@ public interface OrderRepository extends JpaRepository<Order, Long>, JpaSpecific
             @Param("startOfMonth") LocalDateTime startOfMonth,
             @Param("endOfMonth") LocalDateTime endOfMonth);
 
-    @Query("SELECT o FROM Order o WHERE o.user.id = :userId AND o.updatedAt BETWEEN :updatedAtAfter AND :updatedAtBefore AND LOWER(o.country.key) = LOWER(:countryKey)")
+    @Query("SELECT o FROM Order o WHERE o.user.id = :userId " +
+            "AND o.updatedAt BETWEEN :updatedAtAfter AND :updatedAtBefore " +
+            "AND LOWER(o.country.key) = LOWER(:countryKey) " +
+            "AND (:productId IS NULL OR o.product.id = :productId)")
     List<Order> findAllByUserIdAndUpdatedAtBetweenAndCountryKey(
             @Param("userId") Long userId,
             @Param("updatedAtAfter") LocalDateTime updatedAtAfter,
             @Param("updatedAtBefore") LocalDateTime updatedAtBefore,
-            @Param("countryKey") String countryKey
+            @Param("countryKey") String countryKey,
+            @Param("productId") Long productId // Added parameter
     );
 
     default Page<Order> findByKeyword(

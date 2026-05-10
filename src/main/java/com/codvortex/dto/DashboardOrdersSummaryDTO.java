@@ -15,5 +15,6 @@ public class DashboardOrdersSummaryDTO {
     private Integer delivered;
     private Integer shipping;
     private Integer returned;
+    private Integer postponed;
     private Integer reprogrammed;
 }

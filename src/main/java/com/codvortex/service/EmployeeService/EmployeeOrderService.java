@@ -83,6 +83,9 @@ public class EmployeeOrderService {
 
         orderRepository.findById(id).ifPresent(order -> {
             order.setStatus(OrderStatusEnum.valueOf(val));
+            if (OrderStatusEnum.valueOf(val) == OrderStatusEnum.CONFIRMED) {
+                order.setShippingStatus(OrderShippinStatusEnum.SHIPPED);
+            }
             order.setUpdatedAt(LocalDateTime.now());
         });
     }

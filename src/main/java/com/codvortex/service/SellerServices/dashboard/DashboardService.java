@@ -83,23 +83,42 @@ public class DashboardService {
         return balance;
     }
 
-    public DashboardOrdersSummaryDTO getOrdersSummary(String token, LocalDateTime startDate, LocalDateTime endDate, String country) {
+    public DashboardOrdersSummaryDTO getOrdersSummary(String token, LocalDateTime startDate, LocalDateTime endDate, String country, Long productId) {
         User user = userRepository.findByUsername(jwtTokenService.extractEmail(token))
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        List<Order> orders = orderRepository.findAllByUserIdAndUpdatedAtBetweenAndCountryKey(user.getId(), startDate, endDate, country);
+        // Fetch filtered list directly from DB
+        List<Order> orders = orderRepository.findAllByUserIdAndUpdatedAtBetweenAndCountryKey(
+                user.getId(), startDate, endDate, country, productId);
 
         return DashboardOrdersSummaryDTO.builder()
-                .total(orders.size())
+                .total(orders.stream()
+                        .filter(o ->
+                                o.getDate().isAfter(startDate)
+                                && o.getDate().isBefore(endDate)
+                        ).toList().size())
+                .pending(orders.stream()
+                        .filter(o -> (o.getStatus() == OrderStatusEnum.PENDING || o.getStatus() == OrderStatusEnum.NO_REPLY || o.getStatus() == OrderStatusEnum.UNREACHABLE)
+                                && (o.getDate().isAfter(startDate) && o.getDate().isBefore(endDate))
+                        ).toList().size())
+                .canceled(orders.stream()
+                        .filter(o -> o.getStatus() == OrderStatusEnum.CANCELLED
+                                && o.getDate().isAfter(startDate)
+                                && o.getDate().isBefore(endDate)
+                        ).toList().size())
+                .returned(orders.stream()
+                        .filter(o -> (o.getShippingStatus() == OrderShippinStatusEnum.RETURNED  || o.getShippingStatus() == OrderShippinStatusEnum.CANCELLED)
+                                && (o.getDate().isAfter(startDate) && o.getDate().isBefore(endDate))
+                        ).toList().size())
+                .reprogrammed(orders.stream()
+                        .filter(o -> (o.getShippingStatus() == OrderShippinStatusEnum.REPROGRAMMED || o.getShippingStatus() == OrderShippinStatusEnum.NO_REPLY || o.getShippingStatus() == OrderShippinStatusEnum.POSTPONED || o.getShippingStatus() == OrderShippinStatusEnum.UNREACHABLE)
+                                && (o.getDate().isAfter(startDate) && o.getDate().isBefore(endDate))
+                        ).toList().size())
                 .confirmed(orders.stream().filter(o -> o.getStatus() == OrderStatusEnum.CONFIRMED).toList().size())
-                .pending(orders.stream().filter(o -> o.getStatus() == OrderStatusEnum.PENDING).toList().size())
-                .canceled(orders.stream().filter(o -> o.getStatus() == OrderStatusEnum.CANCELLED).toList().size())
                 .delivered(orders.stream().filter(o -> o.getShippingStatus() == OrderShippinStatusEnum.DELIVERED).toList().size())
-                .shipping(orders.stream().filter(o -> o.getShippingStatus() == OrderShippinStatusEnum.SHIPPED).toList().size())
-                .returned(orders.stream().filter(o -> o.getShippingStatus() == OrderShippinStatusEnum.RETURNED).toList().size())
-                .reprogrammed(orders.stream().filter(o -> o.getShippingStatus() == OrderShippinStatusEnum.REPROGRAMMED).toList().size())
+                .shipping(orders.stream().filter(o -> o.getShippingStatus() == OrderShippinStatusEnum.SHIPPED || o.getShippingStatus() == OrderShippinStatusEnum.PREPARING).toList().size())
+                .postponed(orders.stream().filter(o -> o.getStatus() != OrderStatusEnum.POSTPONED).toList().size())
                 .build();
-
     }
 
 }

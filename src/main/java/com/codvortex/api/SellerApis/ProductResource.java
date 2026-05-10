@@ -43,37 +43,50 @@ public class ProductResource {
     }
 
     @GetMapping("/all")
-    public ResponseEntity<List<ProductDTO>> getProduct(@RequestParam("country") String country,
+    public ResponseEntity<List<ProductDTO>> getProduct(@RequestParam(value = "skipQuantity", required = false, defaultValue = "false") Boolean skipQuantity,
+                                                       @RequestParam("country") String country,
                                                        @RequestHeader("Authorization") String authHeader) {
         Long countryId = countryRepository.findByKeyIgnoreCase(country.toLowerCase())
                 .orElseThrow(() -> new IllegalArgumentException("Country not found: " + country)).getId();
 
-        return ResponseEntity.ok(
-                productRepository.findByUserEmail(jwtTokenService.extractEmail(authHeader), countryId)
-                        .stream()
-                        .filter(p -> {
-                            AtomicInteger totalSourced = new AtomicInteger();
-                            AtomicInteger totalDelivered = new AtomicInteger();
+        if (skipQuantity == true) {
+            return                ResponseEntity.ok(productRepository.findByUserEmail(jwtTokenService.extractEmail(authHeader), countryId).stream()
+                    .map(p -> {
+                        ProductDTO productDTO = new ProductDTO();
+                        productDTO.setId(p.getId());
+                        productDTO.setName(p.getName());
+                        productDTO.setImg(p.getImg());
+                        return productDTO;
+                    }).toList());
+        }
+        else {
+            return ResponseEntity.ok(
+                    productRepository.findByUserEmail(jwtTokenService.extractEmail(authHeader), countryId)
+                            .stream()
+                            .filter(p -> {
+                                AtomicInteger totalSourced = new AtomicInteger();
+                                AtomicInteger totalDelivered = new AtomicInteger();
 
-                            p.getSourcingProducts().forEach(sp -> {
-                                totalSourced.addAndGet(sp.getQuantity());
-                            });
-                            p.getOrders().forEach(po -> {
-                                if (po.getShippingStatus().equals(OrderShippinStatusEnum.DELIVERED)) {
-                                    totalDelivered.addAndGet(po.getQuantity());
-                                }
-                            });
+                                p.getSourcingProducts().forEach(sp -> {
+                                    totalSourced.addAndGet(sp.getQuantity());
+                                });
+                                p.getOrders().forEach(po -> {
+                                    if (po.getShippingStatus().equals(OrderShippinStatusEnum.DELIVERED)) {
+                                        totalDelivered.addAndGet(po.getQuantity());
+                                    }
+                                });
 
-                            return ((totalSourced.get() - totalDelivered.get() - p.getQuantity()) > 0) && p.getSourcingProducts().get(0).getSourcing().getStatus() == SourcingStatusEnum.SOURCING_COMPLETE;
-                        })
-                        .map(p -> {
-                            ProductDTO productDTO = new ProductDTO();
-                            productDTO.setId(p.getId());
-                            productDTO.setName(p.getName());
-                            productDTO.setImg(p.getImg());
-                            return productDTO;
-                        }).toList()
-        );
+                                return ((totalSourced.get() - totalDelivered.get() - p.getQuantity()) > 0) && p.getSourcingProducts().get(0).getSourcing().getStatus() == SourcingStatusEnum.SOURCING_COMPLETE;
+                            })
+                            .map(p -> {
+                                ProductDTO productDTO = new ProductDTO();
+                                productDTO.setId(p.getId());
+                                productDTO.setName(p.getName());
+                                productDTO.setImg(p.getImg());
+                                return productDTO;
+                            }).toList()
+                    );
+        }
     }
 
     @GetMapping("/availableStock")
