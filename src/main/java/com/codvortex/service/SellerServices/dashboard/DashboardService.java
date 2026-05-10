@@ -87,38 +87,51 @@ public class DashboardService {
         User user = userRepository.findByUsername(jwtTokenService.extractEmail(token))
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        // Fetch filtered list directly from DB
-        List<Order> orders = orderRepository.findAllByUserIdAndUpdatedAtBetweenAndCountryKey(
+        // 1. Fetch from DB
+        List<Order> allOrders = orderRepository.findAllByUserIdAndUpdatedAtBetweenAndCountryKey(
                 user.getId(), startDate, endDate, country, productId);
 
+        // 2. Filter by Creation Date ONCE so all stats use the same "source of truth"
+        List<Order> filteredOrders = allOrders.stream()
+                .filter(o -> o.getDate().isAfter(startDate) && o.getDate().isBefore(endDate))
+                .toList();
+
+        // 3. Run counts on the filtered list
         return DashboardOrdersSummaryDTO.builder()
-                .total(orders.stream()
-                        .filter(o ->
-                                o.getDate().isAfter(startDate)
-                                && o.getDate().isBefore(endDate)
-                        ).toList().size())
-                .pending(orders.stream()
-                        .filter(o -> (o.getStatus() == OrderStatusEnum.PENDING || o.getStatus() == OrderStatusEnum.NO_REPLY || o.getStatus() == OrderStatusEnum.UNREACHABLE)
-                                && (o.getDate().isAfter(startDate) && o.getDate().isBefore(endDate))
-                        ).toList().size())
-                .canceled(orders.stream()
-                        .filter(o -> o.getStatus() == OrderStatusEnum.CANCELLED
-                                && o.getDate().isAfter(startDate)
-                                && o.getDate().isBefore(endDate)
-                        ).toList().size())
-                .returned(orders.stream()
-                        .filter(o -> (o.getShippingStatus() == OrderShippinStatusEnum.RETURNED  || o.getShippingStatus() == OrderShippinStatusEnum.CANCELLED)
-                                && (o.getDate().isAfter(startDate) && o.getDate().isBefore(endDate))
-                        ).toList().size())
-                .reprogrammed(orders.stream()
-                        .filter(o -> (o.getShippingStatus() == OrderShippinStatusEnum.REPROGRAMMED || o.getShippingStatus() == OrderShippinStatusEnum.NO_REPLY || o.getShippingStatus() == OrderShippinStatusEnum.POSTPONED || o.getShippingStatus() == OrderShippinStatusEnum.UNREACHABLE)
-                                && (o.getDate().isAfter(startDate) && o.getDate().isBefore(endDate))
-                        ).toList().size())
-                .confirmed(orders.stream().filter(o -> o.getStatus() == OrderStatusEnum.CONFIRMED).toList().size())
-                .delivered(orders.stream().filter(o -> o.getShippingStatus() == OrderShippinStatusEnum.DELIVERED).toList().size())
-                .shipping(orders.stream().filter(o -> o.getShippingStatus() == OrderShippinStatusEnum.SHIPPED || o.getShippingStatus() == OrderShippinStatusEnum.PREPARING).toList().size())
-                .postponed(orders.stream().filter(o -> o.getStatus() != OrderStatusEnum.POSTPONED).toList().size())
+                .total((int) filteredOrders.size()) // size() returns int, but casting is safe
+                .pending((int) filteredOrders.stream()
+                        .filter(o -> o.getStatus() == OrderStatusEnum.PENDING
+                                || o.getStatus() == OrderStatusEnum.NO_REPLY
+                                || o.getStatus() == OrderStatusEnum.UNREACHABLE)
+                        .count()) // (int) converts long to int
+                .canceled((int) filteredOrders.stream()
+                        .filter(o -> o.getStatus() == OrderStatusEnum.CANCELLED)
+                        .count())
+                .confirmed((int) filteredOrders.stream()
+                        .filter(o -> o.getStatus() == OrderStatusEnum.CONFIRMED)
+                        .count())
+                .delivered((int) filteredOrders.stream()
+                        .filter(o -> o.getShippingStatus() == OrderShippinStatusEnum.DELIVERED)
+                        .count())
+                .shipping((int) filteredOrders.stream()
+                        .filter(o -> o.getShippingStatus() == OrderShippinStatusEnum.SHIPPED
+                                || o.getShippingStatus() == OrderShippinStatusEnum.PREPARING)
+                        .count())
+                .returned((int) filteredOrders.stream()
+                        .filter(o -> o.getShippingStatus() == OrderShippinStatusEnum.RETURNED
+                                || o.getShippingStatus() == OrderShippinStatusEnum.CANCELLED)
+                        .count())
+                .reprogrammed((int) filteredOrders.stream()
+                        .filter(o -> o.getShippingStatus() == OrderShippinStatusEnum.REPROGRAMMED
+                                || o.getShippingStatus() == OrderShippinStatusEnum.NO_REPLY
+                                || o.getShippingStatus() == OrderShippinStatusEnum.POSTPONED
+                                || o.getShippingStatus() == OrderShippinStatusEnum.UNREACHABLE)
+                        .count())
+                .postponed((int) filteredOrders.stream()
+                        .filter(o -> o.getStatus() == OrderStatusEnum.POSTPONED)
+                        .count())
                 .build();
+
     }
 
 }

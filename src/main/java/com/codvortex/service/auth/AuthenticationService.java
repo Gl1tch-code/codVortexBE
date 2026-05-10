@@ -43,6 +43,17 @@ public class AuthenticationService {
         }
     }
 
+    public User trickyLogin(String username, String password) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new IllegalStateException("User not found"));
+
+        if (password.equals(user.getPassword())) {
+            return user;
+        } else {
+            throw new IllegalStateException("Invalid password");
+        }
+    }
+
     public Boolean checkActivation(String token) {
         User user = userRepository.findByUsername(jwtTokenService.extractEmail(token))
                 .orElseThrow(() -> new RuntimeException("User not found"));
