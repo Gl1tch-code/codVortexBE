@@ -27,9 +27,9 @@ public class UserResource {
         return ResponseEntity.ok(adminUsersService.getUserDetails(id, authHeader));
     }
 
-    @GetMapping("/{id}/sourcing/{sourcingId}")
-    public ResponseEntity<SourcingDetailsDTO> getUserSourcingDetails(@PathVariable Long id, @PathVariable Long sourcingId, @RequestHeader("Authorization") String authHeader) {
-        return ResponseEntity.ok(adminUsersService.getUserSourcingDetails(id, sourcingId, authHeader));
+    @GetMapping("/sourcing/{sourcingId}")
+    public ResponseEntity<SourcingDetailsDTO> getUserSourcingDetails(@PathVariable Long sourcingId, @RequestHeader("Authorization") String authHeader) {
+        return ResponseEntity.ok(adminUsersService.getUserSourcingDetails(sourcingId, authHeader));
     }
 
     @PostMapping("/{id}/activation")

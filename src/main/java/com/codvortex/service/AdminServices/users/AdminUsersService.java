@@ -87,11 +87,11 @@ public class AdminUsersService {
                 .build();
     }
 
-    public SourcingDetailsDTO getUserSourcingDetails(Long id, Long sourcingId, String token) {
+    public SourcingDetailsDTO getUserSourcingDetails(Long sourcingId, String token) {
         userRepository.findByUsernameAndAdmin(jwtTokenService.extractEmail(token))
                 .orElseThrow(() -> new RuntimeException("Invalid user"));
 
-        Sourcing sourcing = sourcingRepository.findByIdAndUserId(sourcingId, id);
+        Sourcing sourcing = sourcingRepository.findById(sourcingId).orElseThrow(() -> new RuntimeException("Not found"));
 
         SourcingDetailsDTO sourcingDetailsDTO = sourcingMapper.toDetailsDTO(sourcing);
         sourcingDetailsDTO.setProducts(productRepository.findAllBySourcingId(sourcing.getId()).stream()

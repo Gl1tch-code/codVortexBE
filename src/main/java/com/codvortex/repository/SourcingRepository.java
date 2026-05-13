@@ -18,9 +18,6 @@ public interface SourcingRepository extends JpaRepository<Sourcing, Long>, JpaSp
     @Query("Select s FROM Sourcing s WHERE s.user.id = :userId AND s.isShippingFeesPayed = false")
     List<Sourcing> findAllByUserIdAndIsShippingFeesPayedFalse(Long userId);
 
-    Sourcing findByIdAndUserId(Long id, Long userId);
-
-
     default Page<Sourcing> findByAdminKeyword(
             Long userId,
             String keyword,
