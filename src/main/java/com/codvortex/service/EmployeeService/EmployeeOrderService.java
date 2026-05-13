@@ -82,11 +82,15 @@ public class EmployeeOrderService {
                 .orElseThrow(() -> new RuntimeException("User Not Found"));
 
         orderRepository.findById(id).ifPresent(order -> {
-            order.setStatus(OrderStatusEnum.valueOf(val));
-            if (OrderStatusEnum.valueOf(val) == OrderStatusEnum.CONFIRMED) {
-                order.setShippingStatus(OrderShippinStatusEnum.SHIPPED);
+
+            if (order.getStatus() != OrderStatusEnum.CONFIRMED) {
+                order.setStatus(OrderStatusEnum.valueOf(val));
+                if (OrderStatusEnum.valueOf(val) == OrderStatusEnum.CONFIRMED) {
+                    order.setShippingStatus(OrderShippinStatusEnum.SHIPPED);
+                }
+                order.setUpdatedAt(LocalDateTime.now());
             }
-            order.setUpdatedAt(LocalDateTime.now());
+
         });
     }
 
@@ -95,8 +99,10 @@ public class EmployeeOrderService {
                 .orElseThrow(() -> new RuntimeException("User Not Found"));
 
         orderRepository.findById(id).ifPresent(order -> {
-            order.setShippingStatus(OrderShippinStatusEnum.valueOf(val));
-            order.setUpdatedAt(LocalDateTime.now());
+            if (order.getStatus() == OrderStatusEnum.CONFIRMED) {
+                order.setShippingStatus(OrderShippinStatusEnum.valueOf(val));
+                order.setUpdatedAt(LocalDateTime.now());
+            }
         });
     }
 

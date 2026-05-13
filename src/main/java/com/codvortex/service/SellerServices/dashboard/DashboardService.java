@@ -87,23 +87,37 @@ public class DashboardService {
         User user = userRepository.findByUsername(jwtTokenService.extractEmail(token))
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        // 1. Fetch from DB
-        List<Order> allOrders = orderRepository.findAllByUserIdAndUpdatedAtBetweenAndCountryKey(
+        // 1. Keep fetching from DB based on updatedAt as you already do
+        List<Order> allOrdersFromDb = orderRepository.findAllByUserIdAndUpdatedAtBetweenAndCountryKey(
                 user.getId(), startDate, endDate, country, productId);
 
-        // 2. Filter by Creation Date ONCE so all stats use the same "source of truth"
-        List<Order> filteredOrders = allOrders.stream()
-                .filter(o -> o.getDate().isAfter(startDate) && o.getDate().isBefore(endDate))
+        // 2. Define the logic: Does this order "belong" to this time period?
+        List<Order> filteredOrders = allOrdersFromDb.stream()
+                .filter(o -> {
+                    boolean isActionState = o.getStatus() == OrderStatusEnum.CONFIRMED
+                            || o.getStatus() == OrderStatusEnum.POSTPONED
+                            || o.getShippingStatus() == OrderShippinStatusEnum.DELIVERED
+                            || o.getShippingStatus() == OrderShippinStatusEnum.SHIPPED;
+
+                    if (isActionState) {
+                        // For these, we only care that they were UPDATED in this range
+                        // Since the DB query already filtered by updatedAt, we just return true
+                        return true;
+                    } else {
+                        // For others (Pending/Canceled), we only want them if they were CREATED in this range
+                        return o.getDate().isAfter(startDate) && o.getDate().isBefore(endDate);
+                    }
+                })
                 .toList();
 
-        // 3. Run counts on the filtered list
+        // 3. Build the DTO using the same counting logic as before
         return DashboardOrdersSummaryDTO.builder()
-                .total((int) filteredOrders.size()) // size() returns int, but casting is safe
+                .total(filteredOrders.size())
                 .pending((int) filteredOrders.stream()
                         .filter(o -> o.getStatus() == OrderStatusEnum.PENDING
                                 || o.getStatus() == OrderStatusEnum.NO_REPLY
                                 || o.getStatus() == OrderStatusEnum.UNREACHABLE)
-                        .count()) // (int) converts long to int
+                        .count())
                 .canceled((int) filteredOrders.stream()
                         .filter(o -> o.getStatus() == OrderStatusEnum.CANCELLED)
                         .count())
@@ -131,7 +145,6 @@ public class DashboardService {
                         .filter(o -> o.getStatus() == OrderStatusEnum.POSTPONED)
                         .count())
                 .build();
-
     }
 
 }

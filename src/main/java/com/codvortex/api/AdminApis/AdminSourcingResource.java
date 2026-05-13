@@ -1,7 +1,11 @@
 package com.codvortex.api.AdminApis;
 
+import com.codvortex.dto.SourcingDTO;
 import com.codvortex.service.AdminServices.sourcing.AdminSourcingService;
+import com.codvortex.utils.SourcingStatusEnum;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -11,6 +15,11 @@ public class AdminSourcingResource {
 
     @Autowired
     private AdminSourcingService adminSourcingService;
+
+    @GetMapping
+    public ResponseEntity<Page<SourcingDTO>> getAllSourcing(@RequestParam String q, Long userId, String country, SourcingStatusEnum status, Pageable pageable, @RequestHeader("Authorization") String authHeader) {
+        return ResponseEntity.ok(adminSourcingService.getAll(userId, q, country, status, authHeader, pageable));
+    }
 
     @PostMapping("/status/{id}")
     public ResponseEntity<Void> updateStatus(@PathVariable Long id, @RequestParam String value, @RequestHeader("Authorization") String authHeader) {
