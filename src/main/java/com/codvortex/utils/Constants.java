@@ -8,6 +8,6 @@ public final class Constants {
         // restrict instantiation
     }
 
-    public static final BigDecimal DELIVERY_FEES = BigDecimal.valueOf(5000);
+    public static final BigDecimal DELIVERY_FEES = BigDecimal.valueOf(6000);
     public static final BigDecimal CHANGE = BigDecimal.valueOf(66);
 }
