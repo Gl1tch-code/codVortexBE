@@ -11,6 +11,7 @@ import com.codvortex.repository.UserRepository;
 import com.codvortex.utils.Constants;
 import com.codvortex.utils.OrderShippinStatusEnum;
 import com.codvortex.utils.OrderStatusEnum;
+import com.codvortex.utils.RoleEnum;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -83,13 +84,26 @@ public class DashboardService {
         return balance;
     }
 
-    public DashboardOrdersSummaryDTO getOrdersSummary(String token, LocalDateTime startDate, LocalDateTime endDate, String country, Long productId) {
+    public DashboardOrdersSummaryDTO getOrdersSummary(
+            String token,
+            LocalDateTime startDate,
+            LocalDateTime endDate,
+            String country,
+            Long productId,
+            RoleEnum apiRole) {
+
         User user = userRepository.findByUsername(jwtTokenService.extractEmail(token))
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
+        if (apiRole == RoleEnum.ADMIN) {
+            if (!user.getRole().equals(RoleEnum.ADMIN)) {
+                throw new RuntimeException("Cant call this api with other than an ADMIN user !");
+            }
+        }
+
         // 1. Keep fetching from DB based on updatedAt as you already do
         List<Order> allOrdersFromDb = orderRepository.findAllByUserIdAndUpdatedAtBetweenAndCountryKey(
-                user.getId(), startDate, endDate, country, productId);
+                apiRole == RoleEnum.ADMIN ? null : user.getId(), startDate, endDate, country, productId);
 
         // 2. Define the logic: Does this order "belong" to this time period?
         List<Order> filteredOrders = allOrdersFromDb.stream()

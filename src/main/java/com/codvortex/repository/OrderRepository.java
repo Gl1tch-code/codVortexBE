@@ -32,7 +32,7 @@ public interface OrderRepository extends JpaRepository<Order, Long>, JpaSpecific
             @Param("startOfMonth") LocalDateTime startOfMonth,
             @Param("endOfMonth") LocalDateTime endOfMonth);
 
-    @Query("SELECT o FROM Order o WHERE o.user.id = :userId " +
+    @Query("SELECT o FROM Order o WHERE (:userId IS NULL OR o.user.id = :userId) " +
             "AND o.updatedAt BETWEEN :updatedAtAfter AND :updatedAtBefore " +
             "AND LOWER(o.country.key) = LOWER(:countryKey) " +
             "AND (:productId IS NULL OR o.product.id = :productId)")
@@ -41,7 +41,7 @@ public interface OrderRepository extends JpaRepository<Order, Long>, JpaSpecific
             @Param("updatedAtAfter") LocalDateTime updatedAtAfter,
             @Param("updatedAtBefore") LocalDateTime updatedAtBefore,
             @Param("countryKey") String countryKey,
-            @Param("productId") Long productId // Added parameter
+            @Param("productId") Long productId
     );
 
     default Page<Order> findByKeyword(
@@ -129,11 +129,11 @@ public interface OrderRepository extends JpaRepository<Order, Long>, JpaSpecific
             // ✅ Date range predicate
             Predicate datePredicate = cb.conjunction();
             if (startDate != null && endDate != null) {
-                datePredicate = cb.between(root.get("date"), startDate, endDate);
+                datePredicate = cb.between(root.get("updatedAt"), startDate, endDate);
             } else if (startDate != null) {
-                datePredicate = cb.greaterThanOrEqualTo(root.get("date"), startDate);
+                datePredicate = cb.greaterThanOrEqualTo(root.get("updatedAt"), startDate);
             } else if (endDate != null) {
-                datePredicate = cb.lessThanOrEqualTo(root.get("date"), endDate);
+                datePredicate = cb.lessThanOrEqualTo(root.get("updatedAt"), endDate);
             }
 
             // ✅ Keyword search

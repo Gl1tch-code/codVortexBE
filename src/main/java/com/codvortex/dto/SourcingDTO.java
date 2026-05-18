@@ -24,4 +24,8 @@ public class SourcingDTO {
     private SourcingPaymentStatusEnum paymentStatus;
     private BigDecimal shippingFees;
     private Boolean isShippingFeesPayed;
+
+    private Long userId;
+    private String userEmail;
+    private String userPhone;
 }

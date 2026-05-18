@@ -35,6 +35,11 @@ public class AdminSourcingService {
 
         return sourcings.map(s -> {
             SourcingDTO sourcingDTO = sourcingMapper.toDTO(s);
+
+            sourcingDTO.setUserId(s.getUser().getId());
+            sourcingDTO.setUserEmail(s.getUser().getEmail());
+            sourcingDTO.setUserPhone(s.getUser().getPhoneNumber());
+
             sourcingDTO.setProductsCount(s.getSourcingProducts().size());
             AtomicInteger totalProductsQuantity = new AtomicInteger(0);
 

@@ -1,4 +1,4 @@
-package com.codvortex.api.SellerApis;
+package com.codvortex.api.AdminApis;
 
 import com.codvortex.dto.DashboardOrdersSummaryDTO;
 import com.codvortex.service.SellerServices.dashboard.DashboardService;
@@ -7,27 +7,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 
 @RestController
-@RequestMapping("/dashboard")
-public class DashboardResource {
+@RequestMapping("/admin/dashboard")
+public class AdminDashboardResource {
 
     @Autowired
     private DashboardService dashboardService;
-
-    @GetMapping("/balance")
-    public ResponseEntity<BigDecimal> getBalance(@RequestHeader("Authorization") String authHeader) {
-        return ResponseEntity.ok(dashboardService.getBalance(authHeader));
-    }
-
-    @GetMapping("/all-delivered")
-    public ResponseEntity<Integer> getPerformance(@RequestHeader("Authorization") String authHeader) {
-        return ResponseEntity.ok(dashboardService.getUserPerf(authHeader));
-    }
 
     @GetMapping("/orders")
     public ResponseEntity<DashboardOrdersSummaryDTO> getOrders(
@@ -43,7 +32,7 @@ public class DashboardResource {
         Instant endDateinstant = Instant.parse(endDate);
         LocalDateTime end = LocalDateTime.ofInstant(endDateinstant, ZoneId.systemDefault());
 
-        return ResponseEntity.ok(dashboardService.getOrdersSummary(authHeader, start, end, country, productId, RoleEnum.SELLER));
+        return ResponseEntity.ok(dashboardService.getOrdersSummary(authHeader, start, end, country, productId, RoleEnum.ADMIN));
     }
 
 }
